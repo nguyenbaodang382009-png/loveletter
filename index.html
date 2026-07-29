@@ -66,7 +66,7 @@ canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none}
 #pw .pwhint{font-size:15px;opacity:.6;font-style:italic;max-width:300px;line-height:1.6;
   text-transform:none;letter-spacing:0}
 #pw input{width:min(230px,74vw);padding:14px 18px;border-radius:14px;text-align:center;
-  font-family:inherit;font-size:24px;letter-spacing:8px;color:#fff;
+  font-family:inherit;font-size:24px;letter-spacing:8px;text-indent:8px;color:#fff;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.25);outline:none}
 #pw input:focus{border-color:var(--rose);box-shadow:0 0 22px rgba(255,120,160,.3)}
 #pw button{padding:12px 34px;border-radius:999px;border:0;cursor:pointer;font-size:16px;
@@ -88,7 +88,7 @@ canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none}
 #loader .num small{font-size:.3em;opacity:.45;margin-left:4px}
 #loader .track{width:min(280px,64vw);height:2px;border-radius:2px;background:rgba(255,255,255,.13);overflow:hidden}
 #loader .bar{height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));
-  box-shadow:0 0 14px var(--rose);transition:width .12s linear}
+  box-shadow:0 0 14px var(--rose)}
 #loader .msg{font-family:'Dancing Script',cursive;font-size:24px;color:var(--rose-soft);opacity:.9;
   min-height:1.4em;text-align:center;padding:0 20px}
 #loader .msg em{display:block;font-family:'Cormorant Garamond',serif;font-size:14px;
@@ -512,7 +512,20 @@ const LMSG=[
 const pct=document.getElementById('pct'),bar=document.getElementById('bar'),lmsg=document.getElementById('lmsg');
 function setMsg(i){lmsg.innerHTML=LMSG[i][0]+'<em>'+LMSG[i][1]+'</em>'}
 setMsg(0);
+let loaderDone=false;
+function finishLoader(){
+  if(loaderDone)return; loaderDone=true;
+  pct.textContent='100';bar.style.width='100%';
+  setTimeout(()=>{
+    document.getElementById('loader').classList.add('done');
+    const g=document.getElementById('gate');
+    g.style.transition='opacity 1s ease';g.style.opacity='1';
+  },400);
+}
 function runLoader(){
+  /* an toàn: nếu trình duyệt tạm dừng animation (đổi app, tiết kiệm pin)
+     thì vẫn cho vào sau 4.5s, không để treo màn hình loading */
+  setTimeout(finishLoader,4500);
   const dur=2600,t0=performance.now();let mi=0;
   (function tick(now){
     const t=Math.min((now-t0)/dur,1);
@@ -520,13 +533,9 @@ function runLoader(){
     const n=Math.min(100,Math.floor(eased*100+(t<1?Math.random()*2:0)));
     pct.textContent=n;bar.style.width=n+'%';
     const want=n>78?2:n>40?1:0; if(want!==mi){mi=want;setMsg(mi)}
+    if(loaderDone)return;
     if(t<1)requestAnimationFrame(tick);
-    else{pct.textContent='100';bar.style.width='100%';
-      setTimeout(()=>{
-        document.getElementById('loader').classList.add('done');
-        const g=document.getElementById('gate');
-        g.style.transition='opacity 1s ease';g.style.opacity='1';
-      },500);}
+    else finishLoader();
   })(performance.now());
 }
 
@@ -558,15 +567,32 @@ document.getElementById('env').addEventListener('click',()=>{
 });
 
 /* ---------------- reveal + progress ---------------- */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.15});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 document.querySelectorAll('section').forEach(s=>{
   s.querySelectorAll('.reveal').forEach((el,i)=>el.style.transitionDelay=(i*.14)+'s')});
+
+/* Hiện chữ khi cuộn tới. Có 2 lớp: IntersectionObserver + tự kiểm tra bằng tay,
+   để chắc chắn không bao giờ có chuyện chữ bị ẩn luôn không hiện ra. */
+function revealCheck(){
+  const lim=innerHeight*.92;
+  document.querySelectorAll('.reveal:not(.in),.frame:not(.in)').forEach(el=>{
+    if(el.getBoundingClientRect().top<lim)el.classList.add('in');
+  });
+}
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:0,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+}else{
+  document.querySelectorAll('.reveal,.frame').forEach(el=>el.classList.add('in'));
+}
 addEventListener('scroll',()=>{
   const p=scrollY/(document.body.scrollHeight-innerHeight||1);
   document.getElementById('progress').style.width=(p*100)+'%';
   document.getElementById('hint').style.opacity=scrollY>90?0:.4;
-});
+  revealCheck();
+},{passive:true});
+addEventListener('resize',revealCheck);
+revealCheck();
+let rc=0;const rcT=setInterval(()=>{revealCheck();if(++rc>40)clearInterval(rcT)},400);
 
 /* ---------------- typewriter ---------------- */
 const LINES=[
@@ -646,8 +672,11 @@ const gal=document.getElementById('gallery');
 gal.innerHTML=CAPS.map((c,i)=>
  `<figure class="frame" data-i="${i}"><img src="photos/${i+1}.jpg" alt="" loading="lazy">
   <figcaption>${c[0]}<i>${c[1]}</i></figcaption></figure>`).join('');
-const gio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.1});
-gal.querySelectorAll('.frame').forEach((f,i)=>{f.style.transitionDelay=((i%6)*.08)+'s';gio.observe(f)});
+gal.querySelectorAll('.frame').forEach((f,i)=>f.style.transitionDelay=((i%6)*.08)+'s');
+if('IntersectionObserver' in window){
+  const gio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:0,rootMargin:'0px 0px -5% 0px'});
+  gal.querySelectorAll('.frame').forEach(f=>gio.observe(f));
+}
 
 /* ---------------- lightbox ---------------- */
 const lb=document.createElement('div');lb.id='lb';
