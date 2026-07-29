@@ -190,9 +190,25 @@ em.hi{font-style:italic;color:var(--rose)}
 .hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;
   font-size:10px;letter-spacing:5px;opacity:.4;text-transform:uppercase;
   animation:float 2.8s ease-in-out infinite;transition:opacity .4s;pointer-events:none}
-#mute{position:fixed;top:14px;right:14px;z-index:80;background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.2);color:var(--ink);border-radius:50%;
-  width:42px;height:42px;font-size:16px;cursor:pointer;backdrop-filter:blur(8px)}
+/* now playing */
+#np{position:fixed;top:14px;right:14px;z-index:80;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  border-radius:999px;padding:7px 15px 7px 9px;backdrop-filter:blur(10px);cursor:pointer;
+  color:var(--ink);font-family:inherit;font-size:12px;letter-spacing:.4px;
+  max-width:min(72vw,250px);transition:opacity .4s}
+#np .ico{width:26px;height:26px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(135deg,#ff9ebb,#e0567f);color:#3a0018;
+  display:flex;align-items:center;justify-content:center;font-size:11px}
+#np .txt{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;line-height:1.35}
+#np .txt b{display:block;font-weight:400;color:var(--gold)}
+#np .txt i{font-style:normal;opacity:.5;font-size:10.5px}
+#np.paused{opacity:.5}
+#yt{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-100px;top:-100px}
+.bars{display:flex;gap:2px;align-items:flex-end;height:11px}
+.bars span{width:2px;background:#3a0018;border-radius:1px;animation:eq .9s ease-in-out infinite}
+.bars span:nth-child(2){animation-delay:.2s}.bars span:nth-child(3){animation-delay:.4s}
+@keyframes eq{0%,100%{height:3px}50%{height:11px}}
+#np.paused .bars span{animation-play-state:paused;height:5px}
 </style>
 </head>
 <body class="lock">
@@ -222,7 +238,11 @@ em.hi{font-style:italic;color:var(--rose)}
   <div class="tap">Chạm để mở · <em>tap to open</em></div>
 </div>
 
-<button id="mute" title="nhạc">♪</button>
+<div id="np" class="paused" title="nhạc">
+  <div class="ico"><div class="bars"><span></span><span></span><span></span></div></div>
+  <div class="txt"><b>Just The Way You Are</b><i>Bruno Mars</i></div>
+</div>
+<div id="yt"></div>
 
 <main id="main">
 
@@ -479,27 +499,23 @@ addEventListener('keydown',e=>{if(!lb.classList.contains('on'))return;
   if(e.key==='Escape')lb.classList.remove('on');
   if(e.key==='ArrowLeft')show(cur-1); if(e.key==='ArrowRight')show(cur+1);});
 
-/* ---------------- ambient music ---------------- */
-let actx,gain,on=true;
-function startMusic(){
-  if(actx)return;
-  actx=new (window.AudioContext||window.webkitAudioContext)();
-  gain=actx.createGain();gain.gain.value=.05;gain.connect(actx.destination);
-  const notes=[523.25,587.33,659.25,783.99,880,783.99,659.25,587.33,523.25,440];
-  let i=0;
-  setInterval(()=>{
-    if(!on||actx.state!=='running')return;
-    const o=actx.createOscillator(),g=actx.createGain();
-    o.type='sine';o.frequency.value=notes[i%notes.length];
-    g.gain.setValueAtTime(0,actx.currentTime);
-    g.gain.linearRampToValueAtTime(.5,actx.currentTime+.45);
-    g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+2.8);
-    o.connect(g);g.connect(gain);o.start();o.stop(actx.currentTime+2.9);
-    i++;
-  },1450);
-}
-document.getElementById('mute').onclick=e=>{e.stopPropagation();on=!on;
-  e.currentTarget.style.opacity=on?1:.35;e.currentTarget.textContent=on?'♪':'✕';};
+/* ---------------- music: Bruno Mars – Just The Way You Are ---------------- */
+const SONG='LjhCEhWiKXk';
+let yt=null,wantPlay=false;
+const np=document.getElementById('np');
+(function(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';
+  document.head.appendChild(s)})();
+window.onYouTubeIframeAPIReady=()=>{
+  yt=new YT.Player('yt',{videoId:SONG,
+    playerVars:{autoplay:0,controls:0,loop:1,playlist:SONG,playsinline:1,rel:0},
+    events:{
+      onReady:()=>{yt.setVolume(45); if(wantPlay)yt.playVideo()},
+      onStateChange:e=>np.classList.toggle('paused',e.data!==YT.PlayerState.PLAYING)
+    }});
+};
+function startMusic(){wantPlay=true; if(yt&&yt.playVideo)yt.playVideo()}
+np.addEventListener('click',e=>{e.stopPropagation(); if(!yt)return;
+  if(np.classList.contains('paused'))yt.playVideo(); else yt.pauseVideo();});
 </script>
 </body>
 </html>
