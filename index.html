@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gửi Nấm ♡</title>
+<meta name="description" content="Một lá thư cho Mỹ Hà.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="Gửi Nấm ♡">
+<meta property="og:description" content="Anh có chuyện muốn nói với em…">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f8ecf2;
+  --rose:#ff7aa2;
+  --rose-soft:#ffb3c9;
+  --gold:#f3d9a4;
+  --wine:#8d1b3d;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:#08030d;color:var(--ink);
+  font-family:'Cormorant Garamond',serif;overflow-x:hidden;
+}
+body.lock{overflow:hidden}
+
+/* ---------------- backdrop ---------------- */
+#sky{position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 18% 8%, #4a1238 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 82% 26%, #2b1145 0%, transparent 60%),
+    radial-gradient(ellipse 90% 50% at 50% 100%, #5a1435 0%, transparent 65%),
+    #08030d;}
+#vignette{position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 42%,rgba(4,1,8,.72) 100%)}
+#moon{position:fixed;top:8vh;right:10vw;width:90px;height:90px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 35% 32%,#fff8ec,#ffe6c9 45%,#f2c9a4 70%,transparent 72%);
+  box-shadow:0 0 90px 30px rgba(255,220,190,.16);opacity:.5;pointer-events:none}
+canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none}
+#hearts{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.h{position:absolute;bottom:-40px;opacity:0;animation:rise linear forwards;will-change:transform}
+@keyframes rise{
+  0%{opacity:0;transform:translateY(0) translateX(0) scale(.5) rotate(0)}
+  12%{opacity:.95}
+  50%{transform:translateY(-50vh) translateX(26px) scale(1) rotate(18deg)}
+  100%{opacity:0;transform:translateY(-112vh) translateX(-18px) scale(1.15) rotate(-14deg)}
+}
+#progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:70;
+  background:linear-gradient(90deg,var(--rose),var(--gold));box-shadow:0 0 12px var(--rose)}
+
+/* ---------------- loader ---------------- */
+#loader{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;background:#08030d;
+  transition:opacity .9s ease,visibility .9s}
+#loader.done{opacity:0;visibility:hidden}
+#loader .lbl{font-size:12px;letter-spacing:5px;text-transform:uppercase;opacity:.5}
+#loader .num{font-size:clamp(64px,20vw,120px);font-weight:400;line-height:1;
+  color:var(--gold);font-variant-numeric:tabular-nums;text-shadow:0 0 40px rgba(243,217,164,.35)}
+#loader .num small{font-size:.3em;opacity:.45;margin-left:4px}
+#loader .track{width:min(280px,64vw);height:2px;border-radius:2px;background:rgba(255,255,255,.13);overflow:hidden}
+#loader .bar{height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));
+  box-shadow:0 0 14px var(--rose);transition:width .12s linear}
+#loader .msg{font-family:'Dancing Script',cursive;font-size:24px;color:var(--rose-soft);opacity:.9;
+  min-height:1.4em;text-align:center;padding:0 20px}
+#loader .msg em{display:block;font-family:'Cormorant Garamond',serif;font-size:14px;
+  font-style:italic;opacity:.5;letter-spacing:1px;margin-top:4px}
+
+/* ---------------- gate ---------------- */
+#gate{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;
+  background:rgba(8,3,13,.9);backdrop-filter:blur(5px);transition:opacity 1.2s ease,visibility 1.2s}
+#gate.gone{opacity:0;visibility:hidden}
+#gate .to{font-size:12px;letter-spacing:5px;text-transform:uppercase;opacity:.55}
+#gate .who{font-family:'Dancing Script',cursive;font-size:52px;color:var(--gold);line-height:1}
+#gate .who span{display:block;font-family:'Cormorant Garamond',serif;font-size:15px;
+  letter-spacing:4px;color:var(--ink);opacity:.5;text-transform:uppercase;margin-top:6px}
+.env{width:186px;height:126px;position:relative;cursor:pointer;animation:float 3.6s ease-in-out infinite}
+.env::after{content:'';position:absolute;inset:-40px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,120,160,.28),transparent 68%);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+.env .body{position:absolute;inset:0;background:linear-gradient(160deg,#ffaec8,#dd4f7b);
+  border-radius:9px;box-shadow:0 22px 60px rgba(255,110,150,.4)}
+.env .flap{position:absolute;top:0;left:0;width:0;height:0;
+  border-left:93px solid transparent;border-right:93px solid transparent;
+  border-top:68px solid #ffbfd3;border-radius:9px}
+.env .seal{position:absolute;top:44px;left:50%;transform:translateX(-50%);
+  width:42px;height:42px;border-radius:50%;background:var(--wine);
+  display:flex;align-items:center;justify-content:center;color:#ffd9e4;font-size:20px;
+  box-shadow:0 0 24px rgba(255,90,130,.8)}
+#gate .tap{font-size:12px;letter-spacing:5px;opacity:.55;text-transform:uppercase;
+  animation:blink 2.4s ease-in-out infinite}
+#gate .tap em{font-style:normal;opacity:.55}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:.8}}
+
+/* ---------------- content ---------------- */
+main{position:relative;z-index:5;opacity:0;transition:opacity 1.6s ease .2s}
+main.show{opacity:1}
+section{min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;padding:96px 24px;text-align:center;gap:6px}
+.reveal{opacity:0;transform:translateY(42px);filter:blur(6px);
+  transition:opacity 1.3s cubic-bezier(.2,.7,.2,1),transform 1.3s cubic-bezier(.2,.7,.2,1),filter 1.3s ease}
+.reveal.in{opacity:1;transform:none;filter:none}
+
+.eyebrow{font-size:11px;letter-spacing:6px;text-transform:uppercase;opacity:.4;margin-bottom:16px}
+h1{font-family:'Dancing Script',cursive;font-weight:700;
+  font-size:clamp(40px,10.5vw,76px);color:#fff;line-height:1.12;
+  text-shadow:0 0 34px rgba(255,120,160,.5)}
+h2{font-family:'Dancing Script',cursive;font-weight:700;
+  font-size:clamp(29px,7vw,46px);color:var(--gold);line-height:1.2;margin-bottom:6px}
+.en{display:block;font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
+  font-size:.42em;color:var(--ink);opacity:.45;letter-spacing:1.5px;margin-top:8px}
+.vi{font-size:clamp(18px,4.7vw,23px);line-height:1.85;max-width:600px;font-weight:300}
+.vi .en{font-size:15px;opacity:.42;margin-top:10px;line-height:1.6}
+em.hi{font-style:italic;color:var(--rose)}
+.rule{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--rose),transparent);margin:26px 0}
+
+/* typewriter */
+#type{font-size:clamp(19px,5.2vw,27px);max-width:660px;line-height:1.75;font-style:italic;
+  min-height:3.4em;display:flex;align-items:center}
+#type::after{content:'|';color:var(--rose);animation:blinkc .85s step-end infinite;margin-left:2px}
+@keyframes blinkc{50%{opacity:0}}
+#typeEn{font-size:15px;font-style:italic;opacity:.4;max-width:560px;min-height:2.6em;
+  line-height:1.6;transition:opacity .5s;margin-top:14px}
+
+/* counter */
+.counter{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+  border-radius:18px;padding:16px 18px;min-width:86px;backdrop-filter:blur(8px);
+  box-shadow:0 10px 34px rgba(0,0,0,.35)}
+.cell b{display:block;font-size:clamp(26px,7vw,34px);color:var(--gold);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.cell span{display:block;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;opacity:.55;margin-top:6px}
+.cell span i{display:block;font-style:normal;font-size:9px;opacity:.6;letter-spacing:1.5px}
+.big{font-family:'Dancing Script',cursive;font-size:clamp(26px,7vw,40px);color:#fff;
+  margin-top:6px;line-height:1.3;text-shadow:0 0 28px rgba(255,120,160,.45)}
+.big i{display:block;font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;
+  opacity:.42;letter-spacing:1.5px;margin-top:8px}
+.since{font-size:13px;letter-spacing:4px;opacity:.45;text-transform:uppercase;margin-top:22px}
+
+/* gallery — mosaic */
+.gallery{columns:2;column-gap:12px;max-width:860px;width:100%;margin-top:18px}
+@media(min-width:620px){.gallery{columns:3}}
+@media(min-width:960px){.gallery{columns:4}}
+.frame{break-inside:avoid;margin:0 0 12px;border-radius:16px;overflow:hidden;position:relative;
+  border:1px solid rgba(255,255,255,.14);cursor:pointer;
+  box-shadow:0 14px 38px rgba(0,0,0,.5);transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s;
+  opacity:0;transform:translateY(26px) scale(.97)}
+.frame.in{opacity:1;transform:none}
+.frame:hover{transform:translateY(-6px) rotate(-1.2deg);box-shadow:0 22px 50px rgba(255,110,150,.28)}
+.frame img{width:100%;display:block}
+.frame figcaption{position:absolute;left:0;right:0;bottom:0;padding:34px 10px 11px;
+  font-size:13.5px;letter-spacing:.3px;text-align:left;opacity:0;transition:opacity .4s;
+  background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.frame:hover figcaption,.frame.touch figcaption{opacity:1}
+.frame figcaption i{display:block;font-size:10.5px;opacity:.55;letter-spacing:1.2px;margin-top:2px}
+
+/* lightbox */
+#lb{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
+  background:rgba(5,2,9,.94);backdrop-filter:blur(10px);padding:20px;flex-direction:column;gap:14px}
+#lb.on{display:flex}
+#lb img{max-width:min(94vw,760px);max-height:74vh;border-radius:16px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7)}
+#lb .cap{font-size:19px;color:var(--gold);font-family:'Dancing Script',cursive;text-align:center}
+#lb .cap i{display:block;font-family:'Cormorant Garamond',serif;font-size:12.5px;
+  color:var(--ink);opacity:.45;letter-spacing:1.5px;margin-top:4px;font-style:italic}
+#lb .nav{display:flex;gap:26px;align-items:center}
+#lb .nav button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  color:var(--ink);width:46px;height:46px;border-radius:50%;font-size:18px;cursor:pointer}
+#lb .x{position:absolute;top:16px;right:16px;font-size:24px;color:var(--ink);opacity:.6;cursor:pointer}
+
+/* timeline */
+.tl{max-width:580px;width:100%;text-align:left;border-left:1px solid rgba(255,255,255,.18);
+  padding-left:26px;margin-top:16px}
+.tl div{margin-bottom:30px;position:relative}
+.tl div::before{content:'♡';position:absolute;left:-35px;top:6px;color:var(--rose);font-size:14px}
+.tl b{display:block;font-family:'Dancing Script',cursive;font-size:27px;color:var(--gold);font-weight:700}
+.tl p{font-size:17px;opacity:.88;line-height:1.75;font-weight:300;margin-top:4px}
+.tl p i{display:block;font-size:13.5px;opacity:.42;margin-top:6px;line-height:1.55}
+
+/* finale */
+.bigheart{font-size:clamp(84px,24vw,120px);color:var(--rose);margin:12px 0;
+  animation:beat 1.5s ease-in-out infinite;filter:drop-shadow(0 0 44px rgba(255,90,140,.9))}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.22)}28%{transform:scale(1)}42%{transform:scale(1.15)}}
+.sig{font-family:'Dancing Script',cursive;font-size:32px;color:var(--gold);margin-top:26px;font-weight:700}
+.sig span{display:block;font-family:'Cormorant Garamond',serif;font-size:12px;
+  letter-spacing:4px;opacity:.4;text-transform:uppercase;margin-top:8px}
+
+.hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;
+  font-size:10px;letter-spacing:5px;opacity:.4;text-transform:uppercase;
+  animation:float 2.8s ease-in-out infinite;transition:opacity .4s;pointer-events:none}
+#mute{position:fixed;top:14px;right:14px;z-index:80;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.2);color:var(--ink);border-radius:50%;
+  width:42px;height:42px;font-size:16px;cursor:pointer;backdrop-filter:blur(8px)}
+</style>
+</head>
+<body class="lock">
+
+<div id="sky"></div>
+<div id="moon"></div>
+<canvas id="stars"></canvas>
+<div id="hearts"></div>
+<div id="vignette"></div>
+<div id="progress"></div>
+
+<!-- LOADING -->
+<div id="loader">
+  <div class="lbl">Đang mở trái tim</div>
+  <div class="num"><span id="pct">0</span><small>%</small></div>
+  <div class="track"><div class="bar" id="bar"></div></div>
+  <div class="msg" id="lmsg"></div>
+</div>
+
+<!-- ENVELOPE -->
+<div id="gate" style="opacity:0">
+  <div class="to">Gửi · a letter for</div>
+  <div class="who">Nấm<span>Mỹ Hà</span></div>
+  <div class="env" id="env">
+    <div class="body"></div><div class="flap"></div><div class="seal">♡</div>
+  </div>
+  <div class="tap">Chạm để mở · <em>tap to open</em></div>
+</div>
+
+<button id="mute" title="nhạc">♪</button>
+
+<main id="main">
+
+  <section>
+    <p class="eyebrow reveal">11.01.2024 — mãi mãi</p>
+    <h1 class="reveal">Chào em,<br>bé cưng của anh.
+      <span class="en">Hello, my little babe.</span></h1>
+    <div class="rule reveal"></div>
+    <p class="vi reveal">Giữa hàng tỉ người đang thở trong đêm nay,<br>
+      vũ trụ đã để anh tìm thấy <em class="hi">em</em>.
+      <span class="en">Of all the billions of people breathing tonight,<br>the universe let me find you.</span></p>
+  </section>
+
+  <section>
+    <p class="eyebrow reveal">nếu anh chỉ được nói một câu</p>
+    <h2 class="reveal">Thì anh sẽ nói<span class="en">If I had one sentence</span></h2>
+    <p id="type" class="reveal"></p>
+    <p id="typeEn"></p>
+  </section>
+
+  <section>
+    <h2 class="reveal">Chúng mình đã là “chúng mình” được
+      <span class="en">We have been us for</span></h2>
+    <p class="big reveal" id="bigsum"></p>
+    <div class="counter reveal" id="counter"></div>
+    <p class="since reveal">từ 11 · 01 · 2024</p>
+    <div class="rule reveal"></div>
+    <p class="vi reveal">…và từng giây một,<br>anh vẫn sẽ <em class="hi">chọn em</em>.
+      <span class="en">…and every single second, I would choose you again.</span></p>
+  </section>
+
+  <section>
+    <p class="eyebrow reveal">album nhỏ của anh</p>
+    <h2 class="reveal">Những khoảnh khắc anh giữ<span class="en">Moments I keep</span></h2>
+    <p class="vi reveal" style="font-size:15px;opacity:.55;margin-bottom:6px">
+      Chạm vào ảnh để xem lớn hơn ♡ <span class="en">tap a photo to open it</span></p>
+    <div class="gallery" id="gallery"></div>
+    <p class="vi reveal" style="font-size:15px;opacity:.55;margin-top:22px">
+      Mỗi tấm ảnh ở đây là một ngày anh thấy mình may mắn.
+      <span class="en">Every photo here is a day I was lucky.</span></p>
+  </section>
+
+  <section>
+    <p class="eyebrow reveal">anh biết chắc</p>
+    <h2 class="reveal">Những điều nhỏ bé<span class="en">Little truths</span></h2>
+    <div class="tl reveal">
+      <div><b>Lần đầu tiên gặp em</b>
+        <p>Lúc đó anh chưa biết rằng cuộc đời anh vừa lặng lẽ rẽ sang một hướng khác.
+          <i>I didn't know yet that my life had just quietly changed direction.</i></p></div>
+      <div><b>Tiếng cười của em</b>
+        <p>Là âm thanh duy nhất khiến một ngày tệ hại trở nên chịu đựng được.
+          <i>It is the only sound that makes a bad day negotiable.</i></p></div>
+      <div><b>Những ngày bình thường</b>
+        <p>Đi chợ, kẹt xe, những lúc im lặng — em làm cho cả những giờ nhàm chán nhất cũng thành nơi anh muốn ở lại.
+          <i>Groceries, traffic, silence — you make even the boring hours feel like somewhere I want to be.</i></p></div>
+      <div><b>Bây giờ</b>
+        <p>Anh không đi tìm nữa. Anh tìm thấy rồi. Là em.
+          <i>I am not looking anymore. I found it. It's you.</i></p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="vi reveal">Anh không cần “mãi mãi” phải thật hoàn hảo.<br>
+      Anh chỉ cần trong “mãi mãi” đó <em class="hi">có em</em>.
+      <span class="en">I don't need forever to be perfect. I just need it to be with you.</span></p>
+    <div class="bigheart reveal">❤</div>
+    <h1 class="reveal" style="font-size:clamp(34px,9.5vw,60px)">Anh yêu em, Nấm.
+      <span class="en">I love you, my little mushroom.</span></h1>
+    <p class="vi reveal" style="opacity:.75">Hôm nay, ngày mai,<br>và mọi phiên bản của anh sau này.
+      <span class="en">Today, tomorrow, and every version of me that comes after.</span></p>
+    <div class="sig reveal">— Cún của em<span>always your puppy</span></div>
+    <p class="vi reveal" style="font-size:13px;opacity:.38;margin-top:44px">
+      chạm vào đâu cũng được, tim sẽ bay lên ♡</p>
+  </section>
+
+</main>
+
+<div class="hint" id="hint">Kéo xuống ↓ scroll</div>
+
+<script>
+/* ---------------- stars ---------------- */
+const c=document.getElementById('stars'),x=c.getContext('2d');
+let stars=[];
+function resize(){c.width=innerWidth;c.height=innerHeight;
+  stars=Array.from({length:150},()=>({x:Math.random()*c.width,y:Math.random()*c.height,
+    r:Math.random()*1.5+.3,a:Math.random()*6,s:Math.random()*.022+.004}));}
+resize();addEventListener('resize',resize);
+(function draw(){x.clearRect(0,0,c.width,c.height);
+  for(const s of stars){s.a+=s.s;const o=(Math.sin(s.a)+1)/2*.8+.12;
+    x.fillStyle='rgba(255,238,248,'+o+')';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill();}
+  requestAnimationFrame(draw);})();
+
+/* ---------------- hearts ---------------- */
+const HC=['♥','♡','❤','💗','🌸','🌹'];
+const HCOL=['#ff7aa2','#ffb3c9','#f3d9a4','#ffffff','#ff9ebb'];
+function heart(px,py){
+  const e=document.createElement('div');e.className='h';
+  e.textContent=HC[Math.floor(Math.random()*HC.length)];
+  if(px!=null){e.style.left=px+'px';e.style.bottom='auto';e.style.top=py+'px';}
+  else e.style.left=Math.random()*100+'vw';
+  e.style.fontSize=(Math.random()*16+11)+'px';
+  e.style.color=HCOL[Math.floor(Math.random()*HCOL.length)];
+  const d=Math.random()*5+6;e.style.animationDuration=d+'s';
+  document.getElementById('hearts').appendChild(e);
+  setTimeout(()=>e.remove(),d*1000+300);
+}
+setInterval(()=>heart(),620);
+addEventListener('click',e=>{for(let i=0;i<7;i++)setTimeout(()=>heart(e.clientX+(Math.random()*70-35),e.clientY),i*55)});
+
+/* ---------------- loader ---------------- */
+const LMSG=[
+ ['Đang đếm những ngày có em…','counting the days with you'],
+ ['Đang gói lại vài kỷ niệm…','wrapping up a few memories'],
+ ['Gần xong rồi, Nấm ơi…','almost there, my love']
+];
+const pct=document.getElementById('pct'),bar=document.getElementById('bar'),lmsg=document.getElementById('lmsg');
+function setMsg(i){lmsg.innerHTML=LMSG[i][0]+'<em>'+LMSG[i][1]+'</em>'}
+setMsg(0);
+(function(){
+  const dur=2600,t0=performance.now();let mi=0;
+  (function tick(now){
+    const t=Math.min((now-t0)/dur,1);
+    const eased=1-Math.pow(1-t,3);
+    const n=Math.min(100,Math.floor(eased*100+(t<1?Math.random()*2:0)));
+    pct.textContent=n;bar.style.width=n+'%';
+    const want=n>78?2:n>40?1:0; if(want!==mi){mi=want;setMsg(mi)}
+    if(t<1)requestAnimationFrame(tick);
+    else{pct.textContent='100';bar.style.width='100%';
+      setTimeout(()=>{
+        document.getElementById('loader').classList.add('done');
+        const g=document.getElementById('gate');
+        g.style.transition='opacity 1s ease';g.style.opacity='1';
+      },500);}
+  })(performance.now());
+})();
+
+/* ---------------- gate ---------------- */
+document.getElementById('env').addEventListener('click',()=>{
+  document.getElementById('gate').classList.add('gone');
+  document.getElementById('main').classList.add('show');
+  document.body.classList.remove('lock');
+  for(let i=0;i<30;i++)setTimeout(()=>heart(),i*60);
+  startMusic();
+});
+
+/* ---------------- reveal + progress ---------------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+document.querySelectorAll('section').forEach(s=>{
+  s.querySelectorAll('.reveal').forEach((el,i)=>el.style.transitionDelay=(i*.14)+'s')});
+addEventListener('scroll',()=>{
+  const p=scrollY/(document.body.scrollHeight-innerHeight||1);
+  document.getElementById('progress').style.width=(p*100)+'%';
+  document.getElementById('hint').style.opacity=scrollY>90?0:.4;
+});
+
+/* ---------------- typewriter ---------------- */
+const LINES=[
+ ['Em là ý nghĩ anh thích nhất, cái ý nghĩ anh cứ quay về hoài.',
+  'You are my favourite thought, the one I keep going back to.'],
+ ['Yêu em là điều dễ dàng nhất anh từng làm.',
+  'Loving you is the easiest thing I have ever done.'],
+ ['Nếu cả đời này anh chỉ được giữ lại một thứ — thì đó là em.',
+  "If I get to keep only one thing in this life — it's you."],
+ ['Em giống như nhà, một nơi mà anh chưa từng phải rời đi.',
+  'You feel like home, a place I never had to leave.'],
+ ['Giờ thì mọi bài tình ca đều có nghĩa. Tất cả đều đang hát về em.',
+  'Every love song makes sense now. All of them are about you.']
+];
+const tEl=document.getElementById('type'),tEn=document.getElementById('typeEn');
+let li=0,ci=0,del=false;
+(function tw(){
+  const s=LINES[li][0];
+  tEl.textContent=del?s.slice(0,--ci):s.slice(0,++ci);
+  if(!del&&ci===s.length){tEn.textContent=LINES[li][1];tEn.style.opacity=.4;del=true;return setTimeout(tw,2600)}
+  if(del&&ci===0){del=false;li=(li+1)%LINES.length;return setTimeout(tw,360)}
+  if(del)tEn.style.opacity=0;
+  setTimeout(tw,del?22:56);
+})();
+
+/* ---------------- counter ---------------- */
+const START=new Date(2024,0,11,0,0,0);          /* 11 · 01 · 2024 */
+const L=[['ngày','days'],['giờ','hours'],['phút','minutes'],['giây','seconds']];
+document.getElementById('counter').innerHTML=L.map((l,i)=>
+  `<div class="cell"><b id="v${i}">0</b><span>${l[0]}<i>${l[1]}</i></span></div>`).join('');
+const bigsum=document.getElementById('bigsum');
+function ymd(){
+  const n=new Date();
+  let y=n.getFullYear()-START.getFullYear();
+  let m=n.getMonth()-START.getMonth();
+  let d=n.getDate()-START.getDate();
+  if(d<0){m--;d+=new Date(n.getFullYear(),n.getMonth(),0).getDate()}
+  if(m<0){y--;m+=12}
+  const vi=[y&&`${y} năm`,m&&`${m} tháng`,d&&`${d} ngày`].filter(Boolean).join(', ');
+  const en=[y&&`${y} year${y>1?'s':''}`,m&&`${m} month${m>1?'s':''}`,d&&`${d} day${d>1?'s':''}`].filter(Boolean).join(', ');
+  bigsum.innerHTML=vi+'<i>'+en+'</i>';
+}
+ymd();
+setInterval(()=>{
+  const d=Math.floor((Date.now()-START)/1000);
+  const v=[Math.floor(d/86400),Math.floor(d/3600)%24,Math.floor(d/60)%60,d%60];
+  v.forEach((n,i)=>document.getElementById('v'+i).textContent=n);
+},1000);
+
+/* ---------------- gallery ---------------- */
+const CAPS=[
+ ['mặt xấu nhất cũng là mặt anh thương nhất','even your silliest face'],
+ ['áo đồng phục, tuổi học trò','uniforms and school days'],
+ ['tim gửi qua màn hình','a heart across the screen'],
+ ['“ngủ ngon anh iuuu”','goodnight, my love'],
+ ['em của những buổi chiều','you, in the afternoon light'],
+ ['gần nhau là đủ','close is enough'],
+ ['tay anh, tay em','my hand, your hand'],
+ ['em ngủ, anh nhìn','you sleeping, me watching'],
+ ['hai đứa mình','the two of us'],
+ ['thương em qua màn hình','loving you through a screen'],
+ ['nụ hôn bên má','a kiss on your cheek'],
+ ['mặt nhõng nhẽo của em','your spoiled little face'],
+ ['gọi cho nhau mỗi tối','our nightly call'],
+ ['một dải kỷ niệm','a strip of memories'],
+ ['ôm em từ phía sau','holding you from behind'],
+ ['xấu chung cho vui','ugly faces, happy hearts'],
+ ['trái tim này là của em','this heart is yours'],
+ ['những sợi tóc, cái vòng tay','your hair, our bracelets'],
+ ['hành lang, giờ ra chơi','the hallway at break time'],
+ ['vòng tay quen thuộc','the arms you know'],
+ ['những dòng tin nhắn','the messages we sent'],
+ ['bốn ô ảnh, một tình yêu','four frames, one love'],
+ ['má kề má','cheek to cheek']
+];
+const gal=document.getElementById('gallery');
+gal.innerHTML=CAPS.map((c,i)=>
+ `<figure class="frame" data-i="${i}"><img src="photos/${i+1}.jpg" alt="" loading="lazy">
+  <figcaption>${c[0]}<i>${c[1]}</i></figcaption></figure>`).join('');
+const gio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.1});
+gal.querySelectorAll('.frame').forEach((f,i)=>{f.style.transitionDelay=((i%6)*.08)+'s';gio.observe(f)});
+
+/* ---------------- lightbox ---------------- */
+const lb=document.createElement('div');lb.id='lb';
+lb.innerHTML=`<div class="x">✕</div><img id="lbimg" alt="">
+ <div class="cap" id="lbcap"></div>
+ <div class="nav"><button id="lbp">‹</button><button id="lbn">›</button></div>`;
+document.body.appendChild(lb);
+let cur=0;
+function show(i){cur=(i+CAPS.length)%CAPS.length;
+  document.getElementById('lbimg').src='photos/'+(cur+1)+'.jpg';
+  document.getElementById('lbcap').innerHTML=CAPS[cur][0]+'<i>'+CAPS[cur][1]+'</i>';
+  lb.classList.add('on');}
+gal.addEventListener('click',e=>{const f=e.target.closest('.frame');if(f)show(+f.dataset.i)});
+lb.addEventListener('click',e=>{if(e.target===lb||e.target.className==='x')lb.classList.remove('on')});
+document.getElementById('lbp').onclick=e=>{e.stopPropagation();show(cur-1)};
+document.getElementById('lbn').onclick=e=>{e.stopPropagation();show(cur+1)};
+addEventListener('keydown',e=>{if(!lb.classList.contains('on'))return;
+  if(e.key==='Escape')lb.classList.remove('on');
+  if(e.key==='ArrowLeft')show(cur-1); if(e.key==='ArrowRight')show(cur+1);});
+
+/* ---------------- ambient music ---------------- */
+let actx,gain,on=true;
+function startMusic(){
+  if(actx)return;
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  gain=actx.createGain();gain.gain.value=.05;gain.connect(actx.destination);
+  const notes=[523.25,587.33,659.25,783.99,880,783.99,659.25,587.33,523.25,440];
+  let i=0;
+  setInterval(()=>{
+    if(!on||actx.state!=='running')return;
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type='sine';o.frequency.value=notes[i%notes.length];
+    g.gain.setValueAtTime(0,actx.currentTime);
+    g.gain.linearRampToValueAtTime(.5,actx.currentTime+.45);
+    g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+2.8);
+    o.connect(g);g.connect(gain);o.start();o.stop(actx.currentTime+2.9);
+    i++;
+  },1450);
+}
+document.getElementById('mute').onclick=e=>{e.stopPropagation();on=!on;
+  e.currentTarget.style.opacity=on?1:.35;e.currentTarget.textContent=on?'♪':'✕';};
+</script>
+</body>
+</html>

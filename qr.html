@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make the QR ♡</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;gap:20px;padding:30px;
+ background:radial-gradient(ellipse at 30% 10%,#3d1030,transparent 60%),#0a0410;
+ color:#f6e9ef;font-family:'Cormorant Garamond',serif;text-align:center}
+h1{font-family:'Dancing Script',cursive;font-size:44px;color:#f3d9a4;font-weight:700}
+input{width:min(460px,90vw);padding:14px 16px;border-radius:12px;font-size:16px;
+ border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:#fff;
+ font-family:inherit;text-align:center}
+button{padding:12px 28px;border-radius:999px;border:0;cursor:pointer;font-size:16px;
+ font-family:inherit;background:linear-gradient(135deg,#ff9ebb,#e0567f);color:#3a0018;font-weight:600}
+.card{background:#fff;padding:22px;border-radius:24px;box-shadow:0 20px 60px rgba(255,110,150,.3)}
+.card p{color:#8d1b3d;font-family:'Dancing Script',cursive;font-size:24px;margin:10px 0 0}
+small{opacity:.6;max-width:420px;line-height:1.7}
+</style>
+</head>
+<body>
+<h1>Your love link → QR</h1>
+<input id="url" placeholder="paste the link to your love letter here">
+<button onclick="make()">Make QR code</button>
+<div class="card" id="card" style="display:none">
+  <canvas id="qr"></canvas>
+  <p>Scan me ♡</p>
+</div>
+<button id="dl" style="display:none" onclick="dl()">Download QR image</button>
+<small>Point your phone camera at the code. Print it, put it in a card, or hide it somewhere she'll find it.</small>
+<script>
+function make(){
+  const v=document.getElementById('url').value.trim();
+  if(!v)return alert('Paste your link first ♡');
+  QRCode.toCanvas(document.getElementById('qr'),v,
+    {width:280,margin:1,color:{dark:'#8d1b3d',light:'#ffffff'}},
+    e=>{if(e)return alert(e);
+      document.getElementById('card').style.display='block';
+      document.getElementById('dl').style.display='inline-block';});
+}
+function dl(){
+  const a=document.createElement('a');
+  a.download='love-qr.png';
+  a.href=document.getElementById('qr').toDataURL('image/png');
+  a.click();
+}
+</script>
+</body>
+</html>
