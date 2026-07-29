@@ -49,6 +49,31 @@ canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none}
 #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:70;
   background:linear-gradient(90deg,var(--rose),var(--gold));box-shadow:0 0 12px var(--rose)}
 
+/* ---------------- password ---------------- */
+#pw{position:fixed;inset:0;z-index:110;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;background:#08030d;padding:24px;
+  text-align:center;transition:opacity .8s ease,visibility .8s}
+#pw.gone{opacity:0;visibility:hidden}
+#pw .lock{font-size:40px;color:var(--rose);filter:drop-shadow(0 0 26px rgba(255,90,140,.7));
+  animation:float 3.4s ease-in-out infinite}
+#pw h3{font-family:'Dancing Script',cursive;font-weight:700;font-size:clamp(28px,7vw,40px);
+  color:var(--gold);line-height:1.25}
+#pw h3 span{display:block;font-family:'Cormorant Garamond',serif;font-size:13px;
+  font-style:italic;opacity:.42;letter-spacing:1.5px;margin-top:8px}
+#pw .pwhint{font-size:15px;opacity:.6;font-style:italic;max-width:300px;line-height:1.6;
+  text-transform:none;letter-spacing:0}
+#pw input{width:min(230px,74vw);padding:14px 18px;border-radius:14px;text-align:center;
+  font-family:inherit;font-size:24px;letter-spacing:8px;color:#fff;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.25);outline:none}
+#pw input:focus{border-color:var(--rose);box-shadow:0 0 22px rgba(255,120,160,.3)}
+#pw button{padding:12px 34px;border-radius:999px;border:0;cursor:pointer;font-size:16px;
+  font-family:inherit;background:linear-gradient(135deg,#ffaec8,#dd4f7b);color:#3a0018}
+#pw.bad input{border-color:#ff5b7a;animation:shake .45s}
+#pw .err{font-size:13px;color:#ff7f97;height:1.2em;opacity:0;transition:opacity .3s}
+#pw.bad .err{opacity:1}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}
+  40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
 /* ---------------- loader ---------------- */
 #loader{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:20px;background:#08030d;
@@ -220,6 +245,17 @@ em.hi{font-style:italic;color:var(--rose)}
 <div id="vignette"></div>
 <div id="progress"></div>
 
+<!-- PASSWORD -->
+<div id="pw">
+  <div class="lock">♡</div>
+  <h3>Thư này chỉ dành cho một người
+    <span>this letter is for one person only</span></h3>
+  <p class="pwhint">Ngày mình bắt đầu — ngày và tháng thôi<br><i>the day we started · day + month</i></p>
+  <input id="pwin" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+  <div class="err">Chưa đúng rồi, thử lại nha ♡</div>
+  <button id="pwgo">Mở thư</button>
+</div>
+
 <!-- LOADING -->
 <div id="loader">
   <div class="lbl">Đang mở trái tim</div>
@@ -361,7 +397,7 @@ const LMSG=[
 const pct=document.getElementById('pct'),bar=document.getElementById('bar'),lmsg=document.getElementById('lmsg');
 function setMsg(i){lmsg.innerHTML=LMSG[i][0]+'<em>'+LMSG[i][1]+'</em>'}
 setMsg(0);
-(function(){
+function runLoader(){
   const dur=2600,t0=performance.now();let mi=0;
   (function tick(now){
     const t=Math.min((now-t0)/dur,1);
@@ -377,7 +413,25 @@ setMsg(0);
         g.style.transition='opacity 1s ease';g.style.opacity='1';
       },500);}
   })(performance.now());
-})();
+}
+
+/* ---------------- password gate ---------------- */
+const PASS='1101';
+const pw=document.getElementById('pw'),pwin=document.getElementById('pwin');
+function unlock(){
+  const v=pwin.value.trim().replace(/[^0-9a-zA-Z]/g,'');
+  if(v.toLowerCase()===PASS){
+    pw.classList.add('gone');
+    setTimeout(()=>pw.remove(),900);
+    runLoader();
+  }else{
+    pw.classList.add('bad');pwin.value='';
+    setTimeout(()=>pw.classList.remove('bad'),1400);
+  }
+}
+document.getElementById('pwgo').onclick=unlock;
+pwin.addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+setTimeout(()=>pwin.focus(),400);
 
 /* ---------------- gate ---------------- */
 document.getElementById('env').addEventListener('click',()=>{
